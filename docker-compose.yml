@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. The Multi-Tenant Relational Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: hmi-postgres-db
+    environment:
+      POSTGRES_USER: hmi_admin
+      POSTGRES_PASSWORD: local_secure_password_2026
+      POSTGRES_DB: hologramic_engine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Maps yesterday's schema file to automatically initialize the database structure on first boot
+      - ./supabase_schema.sql:/docker-entrypoint-initdb.d/10-init-schema.sql
+    restart: always
+
+  # 2. The Next.js Web Engine & Node Canvas API
+  app:
+    image: node:20-alpine
+    container_name: hmi-core-app
+    working_dir: /usr/src/app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://hmi_admin:local_secure_password_2026@postgres:5432/hologramic_engine
+      # For your Magic Build AI prompt route
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    # Installs native dependencies and fires up the Next.js dev server
+    command: >
+      sh -c "apk add --no-cache python3 make g++ && 
+             npm install && 
+             npm run dev"
+    depends_on:
+      - postgres
+    restart: always
+
+volumes:
+  postgres_data:
