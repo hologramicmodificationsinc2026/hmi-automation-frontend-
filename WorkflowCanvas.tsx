@@ -16,7 +16,7 @@ import {
   Position
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { MagicBuildPrompt } from './MagicBuildPrompt';
+import MagicBuildPrompt from './MagicBuildPrompt';
 
 // ==========================================
 // 1. CUSTOM NEON NODE COMPONENTS
