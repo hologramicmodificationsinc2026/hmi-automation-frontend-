@@ -72,19 +72,10 @@ const initialNodes: Node[] = [
     data: { label: 'Production Webhook' },
   },
 ];
-const transformedNodes = data.workflow.nodes.map((n: any) => ({
-  id: n.id,
-  type: n.type === 'webhookTrigger' ? 'webhookTrigger' : 'scriptExecutor',
-  position: n.position || { x: 150, y: 150 },
-  data: n.data || { label: 'Generated Step' }
-const transformedNodes = data.workflow.nodes.map((n: any) => ({
-  id: n.id,
-  type: n.type === 'webhookTrigger' ? 'webhookTrigger' : 'scriptExecutor',
-  position: n.position || { x: 150, y: 150 },
-  data: n.data || { label: 'Generated Step' }
-}));
-    [setEdges]
-  );
+export default function WorkflowCanvas() {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
