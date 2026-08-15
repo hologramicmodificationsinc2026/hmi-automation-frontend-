@@ -72,13 +72,13 @@ const initialNodes: Node[] = [
     data: { label: 'Production Webhook' },
   },
 ];
-
-const initialEdges: Edge[] = [];
-
-// ==========================================
-// 2. MAIN WORKFLOW CANVAS DASHBOARD
-// ==========================================
-export default function WorkflowCanvas() {
+const transformedNodes = data.workflow.nodes.map((n: any) => ({
+  id: n.id,
+  // Map incoming node types to supported custom components
+  type: n.type === 'webhookTrigger' ? 'webhookTrigger' : 'scriptExecutor',
+  position: n.position || { x: 150, y: 150 },
+  data: n.data || { label: 'Generated Step' }
+}));
   const [nodes, setNodes, onNodesChange ] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange ] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
