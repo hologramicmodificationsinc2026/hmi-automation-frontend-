@@ -77,14 +77,12 @@ const transformedNodes = data.workflow.nodes.map((n: any) => ({
   type: n.type === 'webhookTrigger' ? 'webhookTrigger' : 'scriptExecutor',
   position: n.position || { x: 150, y: 150 },
   data: n.data || { label: 'Generated Step' }
+const transformedNodes = data.workflow.nodes.map((n: any) => ({
+  id: n.id,
+  type: n.type === 'webhookTrigger' ? 'webhookTrigger' : 'scriptExecutor',
+  position: n.position || { x: 150, y: 150 },
+  data: n.data || { label: 'Generated Step' }
 }));
-}));
-  const [nodes, setNodes, onNodesChange ] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange ] = useEdgesState(initialEdges);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#00f0ff', strokeWidth: 2 } }, eds)),
     [setEdges]
   );
 
