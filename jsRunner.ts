@@ -17,15 +17,15 @@ export async function executeJavaScriptNode(
   incomingPayload: any
 ): Promise<ExecutionResult> {
   const startTime = Date.now();
-  
+
   // Create an isolated memory pocket (8MB max to prevent memory exhaustion attacks)
   const isolate = new ivm.Isolate({ memoryLimit: 8 });
-  
+
   try {
     // Establish a secure context execution thread
     const context = await isolate.createContext();
     const jail = context.global;
-    
+
     // Bootstrap the global object inside the sandbox safely
     await jail.set('global', jail.derefInto());
 
@@ -35,44 +35,26 @@ export async function executeJavaScriptNode(
     // Wrap user code in an IIFE and enforce a strict 2000ms execution timeout
     const secureScript = `
       (function() {
-        try {
-          ${userCode}
-        } catch (err) {
-          return { __isError: true, message: err.message };
-        }
-      })()
+        ${userCode}
+      })();
     `;
 
-    const compiledScript = await isolate.compileScript(secureScript);
-    const result = await compiledScript.run(context, { timeout: 2000 });
-
-    // Parse out the returned dataset or handle sandboxed runtime errors
-    if (result && result.__isError) {
-      return {
-        success: false,
-        outputData: null,
-        error: result.message,
-        executionTimeMs: Date.now() - startTime
-      };
-    }
+    const script = await isolate.compileScript(secureScript);
+    const outputData = await script.run(context, { timeout: 2000 });
 
     return {
       success: true,
-      outputData: result,
-      error: undefined,
-      executionTimeMs: Date.now() - startTime
+      outputData,
+      executionTimeMs: Date.now() - startTime,
     };
-
-  } catch (error: any) {
-    // Catches execution timeouts (infinite loops) or memory limit crashes
+  } catch (err: any) {
     return {
       success: false,
       outputData: null,
-      error: error.message || "Execution timeout or memory limit exceeded.",
-      executionTimeMs: Date.now() - startTime
+      error: err.message || String(err),
+      executionTimeMs: Date.now() - startTime,
     };
   } finally {
-    // Explicitly clean up memory references to eliminate resource leaks
     isolate.dispose();
   }
 }
