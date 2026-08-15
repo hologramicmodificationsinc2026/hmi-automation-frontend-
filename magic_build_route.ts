@@ -22,15 +22,70 @@ export async function POST(req: Request) {
     }
 
     // Call OpenAI with structured instructions matching your canvas engine
-    const response = await openai.chat.completions.create({
+   const response = await openai.chat.completions.create({
       model: "gpt-4o-2024-08-06",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `Generate a workflow layout for: "${prompt}"` }
       ],
       response_format: {
-        type: "json_object"
+        type: "json_schema",
+        json_schema: {
+          name: "workflow_layout",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              nodes: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string" },
+                    type: { type: "string" },
+                    position: {
+                      type: "object",
+                      properties: {
+                        x: { type: "number" },
+                        y: { type: "number" }
+                      },
+                      required: ["x", "y"],
+                      additionalProperties: false
+                    },
+                    data: {
+                      type: "object",
+                      properties: {
+                        label: { type: "string" },
+                        codeTemplate: { type: "string" }
+                      },
+                      required: ["label"],
+                      additionalProperties: false
+                    }
+                  },
+                  required: ["id", "type", "position", "data"],
+                  additionalProperties: false
+                }
+              },
+              edges: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string" },
+                    source: { type: "string" },
+                    target: { type: "string" }
+                  },
+                  required: ["id", "source", "target"],
+                  additionalProperties: false
+                }
+              }
+            },
+            required: ["nodes", "edges"],
+            additionalProperties: false
+          }
+        }
       }
+    }); 
     });
 
     const aiContent = response.choices[0].message.content;
