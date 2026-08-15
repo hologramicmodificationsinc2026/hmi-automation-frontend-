@@ -74,10 +74,10 @@ const initialNodes: Node[] = [
 ];
 const transformedNodes = data.workflow.nodes.map((n: any) => ({
   id: n.id,
-  // Map incoming node types to supported custom components
   type: n.type === 'webhookTrigger' ? 'webhookTrigger' : 'scriptExecutor',
   position: n.position || { x: 150, y: 150 },
   data: n.data || { label: 'Generated Step' }
+}));
 }));
   const [nodes, setNodes, onNodesChange ] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange ] = useEdgesState(initialEdges);
